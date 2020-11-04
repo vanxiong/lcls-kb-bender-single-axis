@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ST_AxisGroup" Id="{2b9ff74a-7319-4b0c-80be-9d707f764bb6}">
+    <Declaration><![CDATA[TYPE ST_AxisGroup :
+STRUCT
+	//basic built in functions
+	mcPower		: MC_Power;
+	mcReset		: MC_Reset;
+	mcMoveAbs	: MC_MoveAbsolute;
+	mcMoveRel	: MC_MoveRelative;
+	mcHome		: MC_Home;
+	mcStop		: MC_Stop;
+	mcJog		: MC_Jog;
+	
+	//linkable variables
+	axisRef				: AXIS_REF;;
+	bLimHigh 	AT %I*	: BOOL;
+	bLimLow 	AT %I*	: BOOL;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4022.18">
+  <POU Name="MAIN" Id="{72e1315c-963a-4f0f-b008-6c5645b2798e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	M			: ARRAY [1 .. 4] OF ST_AxisGroup;
+	RTD AT %I*	: ARRAY [1 .. 4] OF INT;
+	Temp1		: LREAL;
+	Temp2		: LREAL;
+	
+	state		: E_State;
+	fSpeed		: LREAL;
+	fPosition	: LREAL;
+	fPosRel		: LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*update Axis_Ref status*)
+M[1].axisRef.ReadStatus();
+//M[2].axisRef.ReadStatus();
+//M[3].axisRef.ReadStatus();
+//M[4].axisRef.ReadStatus();
+
+(*Enable motors*)
+M[1].mcPower(Axis:=M[1].axisRef, Enable:=TRUE, Enable_Positive:=M[1].bLimHigh, Enable_Negative:=M[1].bLimLow);
+//M[2].mcPower(Axis:=M[2].axisRef, Enable:=TRUE, Enable_Positive:=M[2].bLimHigh, Enable_Negative:=M[2].bLimLow);
+//M[3].mcPower(Axis:=M[3].axisRef, Enable:=TRUE, Enable_Positive:=M[3].bLimHigh, Enable_Negative:=M[3].bLimLow);
+//M[4].mcPower(Axis:=M[4].axisRef, Enable:=TRUE, Enable_Positive:=M[4].bLimHigh, Enable_Negative:=M[4].bLimLow);
+
+Temp1:=INT_TO_LREAL(RTD[1])/100;
+Temp2:=INT_TO_LREAL(RTD[2])/100;
+
+IF (fSpeed>0.050) THEN
+	fSpeed:=0.050;
+ELSIF (fSpeed<0.00) THEN
+	fSpeed:=0.00;
+END_IF
+
+CASE state OF
+	E_State.idle:
+		M[1].mcMoveAbs(Axis:=M[1].axisRef, Execute:=FALSE);
+		M[1].mcMoveRel(Axis:=M[1].axisRef, Execute:=FALSE);
+		M[1].mcReset(Axis:=M[1].axisRef, Execute:=FALSE);
+	
+	E_State.moveAbs:
+		M[1].mcMoveRel(Axis:=M[1].axisRef, Execute:=FALSE);
+		M[1].mcMoveAbs(Axis:=M[1].axisRef, Position:=fPosition, Velocity:=fSpeed, Execute:=TRUE);
+		IF M[1].mcMoveAbs.Done THEN
+			state:=E_State.idle;
+		END_IF
+	
+	E_State.moveRel:
+		M[1].mcMoveAbs(Axis:=M[1].axisRef, Execute:=FALSE);
+		M[1].mcMoveRel(Axis:=M[1].axisRef, Distance:=fPosRel, Velocity:=fSpeed, Execute:=TRUE);
+		IF M[1].mcMoveRel.Done THEN
+			state:=E_State.idle;
+		END_IF
+		
+	E_State.reset:
+		M[1].mcReset(Axis:=M[1].axisRef, Execute:=TRUE);
+		M[1].mcMoveAbs(Axis:=M[1].axisRef, Execute:=FALSE);
+		M[1].mcMoveRel(Axis:=M[1].axisRef, Execute:=FALSE);
+		IF M[1].mcReset.Done THEN
+			state:=E_State.idle;
+		END_IF
+		
+	ELSE
+		M[1].mcReset(Axis:=M[1].axisRef, Execute:=TRUE);
+		M[1].mcMoveAbs(Axis:=M[1].axisRef, Execute:=FALSE);
+		M[1].mcMoveRel(Axis:=M[1].axisRef, Execute:=FALSE);
+		IF M[1].mcReset.Done THEN
+			state:=E_State.idle;
+		END_IF
+		
+END_CASE]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
