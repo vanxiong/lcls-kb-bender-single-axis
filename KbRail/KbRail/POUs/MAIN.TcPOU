@@ -13,6 +13,10 @@ VAR
 	fPosition	: LREAL;
 	fPosRel		: LREAL;
 	
+	// For visualization toggle switch
+	bHighBypass : BOOL := FALSE;
+	bLowBypass	: BOOL := FALSE;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -23,7 +27,7 @@ M[1].axisRef.ReadStatus();
 //M[4].axisRef.ReadStatus();
 
 (*Enable motors*)
-M[1].mcPower(Axis:=M[1].axisRef, Enable:=TRUE, Enable_Positive:=M[1].bLimHigh, Enable_Negative:=M[1].bLimLow);
+M[1].mcPower(Axis:=M[1].axisRef, Enable:=TRUE, Enable_Positive:=(M[1].bLimHigh OR bHighBypass), Enable_Negative:=(M[1].bLimLow OR bLowBypass));
 //M[2].mcPower(Axis:=M[2].axisRef, Enable:=TRUE, Enable_Positive:=M[2].bLimHigh, Enable_Negative:=M[2].bLimLow);
 //M[3].mcPower(Axis:=M[3].axisRef, Enable:=TRUE, Enable_Positive:=M[3].bLimHigh, Enable_Negative:=M[3].bLimLow);
 //M[4].mcPower(Axis:=M[4].axisRef, Enable:=TRUE, Enable_Positive:=M[4].bLimHigh, Enable_Negative:=M[4].bLimLow);
@@ -75,5 +79,9 @@ CASE state OF
 		
 END_CASE]]></ST>
     </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="3" Count="56" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>
